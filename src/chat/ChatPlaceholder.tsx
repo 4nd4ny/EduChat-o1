@@ -14,7 +14,7 @@ export default function ChatPlaceholder({}: Props) {
         </p>
         <h1>&nbsp;</h1>
         <p className="text-4xl text-center hover:text-primary flex items-center justify-center gap-1">
-          <Link href="https://github.com/4nd4ny/EduChat/" target="_blank">
+          <Link href="https://github.com/4nd4ny/EduChat-o1/" target="_blank">
             <BsGithub/>
           </Link>
         </p>
