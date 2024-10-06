@@ -26,7 +26,7 @@ export default function ChatPlaceholder({}: Props) {
         <h1>&nbsp;</h1>
         <h1>&nbsp;</h1>
         <p className="text-sm text-center hover:text-primary items-center justify-center gap-1">
-          Des erreurs peuvent survenir lorsque les raisonnements de <Link className="underline" href="https://openai.com/index/introducing-openai-o1-preview/" target="_blank">o1-preview</Link> sont trop longs.
+          "Regénérer" permet d'invoquer <Link className="underline" href="https://openai.com/index/introducing-openai-o1-preview/" target="_blank">o1</Link>.<br/> 
         </p>
       </div>
     </div>
