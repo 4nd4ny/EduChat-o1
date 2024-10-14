@@ -63,7 +63,7 @@ const ProtectedPage: React.FC<ProtectedPageProps> = ({ children }) => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="password-layer bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6 text-nightBlue-900">Accès protégé</h2>
+        <h2 className="text-2xl font-bold mb-6 text-nightBlue-900">Accès vérouillé</h2>
         <input
           name="password"
           type="password"
