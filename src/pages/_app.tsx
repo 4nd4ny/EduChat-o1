@@ -4,7 +4,7 @@ import { Analytics } from "@vercel/analytics/react";
 import Layout from '../context/Layout'; 
 
 import "@/utils/globals.css";
-import 'katex/dist/katex.min.css';
+import 'katex/dist/katex.min.css'; // [REMOVE] A double avec AssistanMessageContent
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
