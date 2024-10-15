@@ -34,12 +34,12 @@ To install this project, create a `.env` file in the root folder of the project 
 
 ```
 REACT_APP_API_KEY=sk-proj-blablabla
-REACT_APP_ORG_KEY=org-blablabla
-REACT_APP_USER_ID=user-blablabla
+REACT_APP_ORG_KEY=org-blablabla <-- Can be removed
+REACT_APP_USER_ID=user-blablabla <-- Can be removed
 REACT_APP_PASSWD=password
 ```
 
-**Note:** `ORG_KEY` and `USER_ID` will be used for billing calculations later. Their usage in the current version is uncertain.
+**Note:** `ORG_KEY` and `USER_ID` will be used for billing calculations later. 
 
 ## Running Locally
 
