@@ -33,5 +33,5 @@ export const defaultConfig = {
 };
 
 export const ApiKey: string = process.env.REACT_APP_API_KEY ?? '';
-export const UserId: string = process.env.REACT_APP_USER_ID ?? '';
-export const OrganisationKey: string = process.env.REACT_APP_ORG_KEY ?? '';
+export const UserId: string = process.env.REACT_APP_USER_ID ?? ''; // [REMOVE] Pour gestion quotas (non utilisé actuellement)
+export const OrganisationKey: string = process.env.REACT_APP_ORG_KEY ?? ''; // [REMOVE] Pour gestion quotas (non utilisé actuellement)
