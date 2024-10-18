@@ -4,7 +4,7 @@ This project is based on [EduChat-4o](https://github.com/4nd4ny/EduChat-4o), whi
 
 ## Overview
 
-EduChat is designed for educational institutions aiming to provide their students with free access to the latest versions of OpenAI's artificial intelligence models. The installation on a server is accomplished easily using a few simple commands, enabling quick and efficient implementation of this educational tool.
+EduChat is designed for educational institutions aiming to provide their students with free access to the latest versions of OpenAI's artificial intelligence models, in compliance with the GDPR. The installation on a server is accomplished easily using a few simple commands, enabling quick and efficient implementation of this educational tool.
 
 ## Key Features
 
@@ -30,16 +30,7 @@ This is my first React/Next.js/TypeScript/Flex project. Thanks to ChatGPT, I was
 
 ## Installation
 
-To install this project, create a `.env` file in the root folder of the project (same folder as `src`), with the following entries:
-
-```
-REACT_APP_API_KEY=sk-proj-blablabla
-REACT_APP_ORG_KEY=org-blablabla
-REACT_APP_USER_ID=user-blablabla
-REACT_APP_PASSWD=password
-```
-
-**Note:** `ORG_KEY` and `USER_ID` will be used for billing calculations later. Their usage in the current version is uncertain.
+To install this project, create a `.env` file in the root folder of the project (same folder as `src`), with API Key, encrypted password, allowed IPs and allowed hours, as provided in `env_example_file.txt`.
 
 ## Running Locally
 
@@ -50,4 +41,4 @@ yarn install
 yarn dev
 ```
 
-This will start a local server on port 3000. You can then navigate to `localhost:3000` to view the project.
+This will start a local server on port 3000. You can then navigate to `localhost:3000` to view the project. I have personally made visible server configuration information with two links in the `rpdg.tsx` page showing the actions taken to be GDPR compliant. You can simply remove these links at first, if you just want to test the site.

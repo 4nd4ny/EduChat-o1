@@ -10,11 +10,15 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const router = useRouter();
+  
   const [isMobile, setIsMobile] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [configbarOpen, setConfigbarOpen] = useState(false);
   
+  const router = useRouter();
+  const path = router.pathname;
+  const isProtected = path !== '/rgpd'; // Exclure la page /rgpd de la protection
+
   useEffect(() => {
     const checkIsMobile = () => {
       setIsMobile(window.innerWidth < 768);
@@ -57,33 +61,42 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <meta name="description" content="ChatGPT for Education - Provided by Chamblandes" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
-      <ProtectedPage>
-        <div className="max-w-screen relative h-screen max-h-screen w-screen overflow-hidden">
-          <div className="flex h-[calc(100vh)] max-h-[calc(100vh)]">
-            <>
-              {isMobile && (
-                <div>
-                  <button
-                    onMouseOver={openSidebar}
-                    onClick={toggleSidebar}
-                    className={`${styles.button} "fixed h-full rounded-md"`}
-                  >
-                  </button>
-                  <div className={styles.tab} onClick={toggleSidebar}>
-                    <span>{sidebarOpen ? 'Fermer' : 'Historique'}</span>
+
+      {isProtected ? (
+        <ProtectedPage>
+          <div className="max-w-screen relative h-screen max-h-screen w-screen overflow-hidden">
+            <div className="flex h-[calc(100vh)] max-h-[calc(100vh)]">
+              <>
+                {isMobile && (
+                  <div>
+                    <button
+                      onMouseOver={openSidebar}
+                      onClick={toggleSidebar}
+                      className={`${styles.button} "fixed h-full rounded-md"`}
+                    >
+                    </button>
+                    <div className={styles.tab} onClick={toggleSidebar}>
+                      <span>{sidebarOpen ? 'Fermer' : 'Historique'}</span>
+                    </div>
                   </div>
+                )}
+                <div className={getSidebarClasses(sidebarOpen)} style={getSidebarStyle(sidebarOpen)}>
+                  <ChatSidebar />
                 </div>
-              )}
-              <div className={getSidebarClasses(sidebarOpen)} style={getSidebarStyle(sidebarOpen)} >
-                <ChatSidebar />
+              </>
+              <div className="flex flex-grow overflow-hidden" onMouseOver={closeSidebar}>
+                {children}
               </div>
-            </>
-            <div className="flex flex-grow overflow-hidden" onMouseOver={closeSidebar}>
-              {children}
             </div>
           </div>
+        </ProtectedPage>
+      ) : (
+        // Si non protégée (ex. rgpd), rendre seulement le contenu
+        <div className="max-w-screen relative h-screen max-h-screen w-screen overflow-hidden">
+          {children}
         </div>
-      </ProtectedPage>
+      )}
+
     </React.Fragment>
   );
 };
