@@ -100,6 +100,14 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
     localStorage.setItem('totalTokens', totalTokens.toString());
   }
 
+  // Fonction updateTokenCount pour mettre à jour le total de tokens :
+  function updateTokenCount(tokenUsage: number) {
+    const previousTokenTotal = getStoredTokenCount();
+    const newTokenTotal = previousTokenTotal + tokenUsage;
+    saveTokenCount(newTokenTotal);
+    return newTokenTotal;
+  }
+
   // Fonction pour formater les tokens en kt, mt, gt, etc.
   const formatTokens = (totalTokens: number): string => {
     // Définition des seuils pour les valeurs des unités
@@ -172,12 +180,7 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
   
         const { reply, tokenUsage } = await response.json(); // Lecture du contenu JSON
   
-        // Cumuler les tokens dans le localStorage
-        const previousTokenTotal = getStoredTokenCount();
-        const newTokenTotal = previousTokenTotal + tokenUsage;
-        saveTokenCount(newTokenTotal);
-  
-        // Mettre à jour le titre de l'onglet avec le nouveau cumul de tokens
+        const newTokenTotal = updateTokenCount(tokenUsage);
         updateTabTitleWithTokens(newTokenTotal);  
 
         const message: OpenAIChatMessage = {
@@ -351,8 +354,9 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const name = await response.text();
+      const { name, tokenUsage } = await response.json(); // Lecture du contenu JSON  
       setConversationName(name);
+      saveTokenCount(tokenUsage);
 
     } catch (error) {
       console.error("Error generating title:", error);
