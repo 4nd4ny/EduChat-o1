@@ -1,5 +1,5 @@
 import React, { useState, useEffect, KeyboardEvent, ReactNode } from 'react';
-import { DateTime } from 'luxon'; 
+// import { DateTime } from 'luxon'; 
 
 interface ProtectedPageProps {
   children: ReactNode;
@@ -76,15 +76,17 @@ const ProtectedPage: React.FC<ProtectedPageProps> = ({ children }) => {
     return <>{children}</>;
   }
 
+  /*
   const timeZone = process.env.SET_TIME_ZONE || 'Europe/Zurich'; // Défaut sur 'Europe/Zurich'
   const localTime = DateTime.now().setZone(timeZone);
   const currentHour = localTime.hour.toString().padStart(2, '0');
   const currentMinute = localTime.minute.toString().padStart(2, '0');
+  */
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
       <div className="password-layer bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold mb-6 text-nightBlue-900">From {clientIp} at {currentHour}:{currentMinute}</h2>
+        <h2 className="text-2xl font-bold mb-6 text-nightBlue-900">{clientIp}</h2>
         <input
           name="password"
           type="password"
