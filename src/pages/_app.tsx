@@ -3,7 +3,6 @@ import type { AppProps } from "next/app";
 import Layout from '../context/Layout'; 
 
 import "@/utils/globals.css";
-import 'katex/dist/katex.min.css'; // [REMOVE] A double avec AssistanMessageContent
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
