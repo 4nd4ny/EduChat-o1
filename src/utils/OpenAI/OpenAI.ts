@@ -7,8 +7,9 @@ export type OpenAIRequest = {
 
 export const getOpenAICompletion = async (
   payload: OpenAIRequest
-): Promise<string> => {
+): Promise<{ reply: string; tokenUsage: number }> => { 
   let reply = "Something went wrong."; // Valeur par défaut en cas d'erreur
+  let currentTokenUsage = 0;  // Variable pour les tokens utilisés dans l'appel actuel
 
   try {
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -24,16 +25,31 @@ export const getOpenAICompletion = async (
     if (!response.ok) {
       const contentType = response.headers.get("content-type");
       if (contentType && contentType.includes("application/json")) {
-        const errorData = await response.json();
-        reply = errorData.error?.message || "An error occurred.";
+        try {
+          // Tenter de parser la réponse en JSON
+          const errorData = await response.json();
+          reply = errorData.error?.message || "An error occurred.";
+        } catch (jsonParseError) {
+          // Si une erreur survient lors du parsing JSON
+          reply = `Failed to parse JSON response. Status: ${response.status}`;
+          console.error("Error parsing JSON response:", jsonParseError);
+        }
       } else {
-        reply = `Unexpected response format from server. Status: ${response.status}`;
+        // La réponse n'est pas du JSON, récupérer le texte brut
+        const errorText = await response.text();
+        reply = `Unexpected response format from server. Status: ${response.status}. Response: ${errorText}`;
       }
     } else {
       // Extraire la réponse au format JSON
       const data = await response.json();
       if (data && data.choices && data.choices.length > 0) {
-        reply = data.choices[0].message.content.trim();
+        //reply = data.choices[0].message.content.trim();
+        reply = data.choices?.[0]?.message?.content || "No content in response.";
+        if (data.usage) {
+          const { total_tokens } = data.usage;
+          currentTokenUsage = total_tokens;  // Nombre total de tokens utilisés pour cette requête
+          console.log(`Tokens utilisés dans cet appel : ${currentTokenUsage}`);
+        }
       } else {
         reply = "Invalid response structure from OpenAI API.";
       }
@@ -43,6 +59,6 @@ export const getOpenAICompletion = async (
     console.error("Error fetching response:", error);
     reply = error.message || "An unexpected error occurred.";
   }
-
-  return reply;
+  // Retourner la réponse et le nombre de tokens utilisés
+  return { reply, tokenUsage: currentTokenUsage };
 };

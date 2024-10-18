@@ -79,20 +79,60 @@ const OpenAIContext = React.createContext<{
 
 export default function OpenAIProvider({ children }: PropsWithChildren) {
   
-
-
   // General
   const router = useRouter(); 
   const [loading, setLoading] = React.useState(false);
 
-
   // Model
   const modelList = Object.keys(OpenAIChatModels);
-
 
   // Messages
   const [messages, setMessages] = React.useState<OpenAIChatMessage[]>([]);
 
+  // Fonction getStoredTokenCount pour récupérer le total de tokens :
+  function getStoredTokenCount(): number {
+    const storedTokens = localStorage.getItem('totalTokens');
+    return storedTokens ? parseInt(storedTokens, 10) : 0; // Retourne 0 si aucun token n'est stocké
+  }
+  
+  // Fonction saveTokenCount pour sauvegarder le nouveau total de tokens :
+  function saveTokenCount(totalTokens: number) {
+    localStorage.setItem('totalTokens', totalTokens.toString());
+  }
+
+  // Fonction pour formater les tokens en kt, mt, gt, etc.
+  const formatTokens = (totalTokens: number): string => {
+    // Définition des seuils pour les valeurs des unités
+    const kilo = 1_000;          // 10^3
+    const mega = 1_000_000;      // 10^6
+    const giga = 1_000_000_000;  // 10^9
+    const tera = 1_000_000_000_000;  // 10^12
+    const peta = 1_000_000_000_000_000;  // 10^15
+    let formattedValue: string;
+    
+    if (totalTokens >= peta) {
+      formattedValue = `${(totalTokens / peta).toFixed(2)} Pt`; // Petatokens
+    } else if (totalTokens >= tera) {
+      formattedValue = `${(totalTokens / tera).toFixed(2)} Tt`; // Teratokens
+    } else if (totalTokens >= giga) {
+      formattedValue = `${(totalTokens / giga).toFixed(2)} Gt`; // Gigatokens
+    } else if (totalTokens >= mega) {
+      formattedValue = `${(totalTokens / mega).toFixed(2)} Mt`; // Megatokens
+    } else if (totalTokens >= kilo) {
+      formattedValue = `${(totalTokens / kilo).toFixed(2)} Kt`; // Kilotokens
+    } else {
+      formattedValue = `${totalTokens} tokens`; // Tokens (pour les petites valeurs)
+    }
+
+    return formattedValue;
+  };
+
+  // Fonction pour mettre à jour le titre de l'onglet avec les unités appropriées
+  const updateTabTitleWithTokens = (totalTokens: number) => {
+    const formattedTokens = formatTokens(totalTokens);  // Convertir en kt, mt, etc.
+    document.title = `EduChat: ${formattedTokens}`;
+  };
+  
   const submit = useCallback(
     async (messages_: OpenAIChatMessage[] = [], modelIndex: number = 0) => {
       
@@ -110,15 +150,10 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
         // Sélection du modèle actuel en fonction de l'index
         const maximum = OpenAIChatModels[currentModel].maxLimit;
         
-        let requestBody;
-
-        requestBody = {
-            max_completion_tokens: maximum,
-            model: currentModel,
-            messages: messagesToSend.map(({ role, content }) => ({
-              role,
-              content,
-            })),
+        let requestBody = {
+          max_completion_tokens: maximum,
+          model: currentModel,
+          messages: messagesToSend.map(({ role, content }) => ({ role, content })),
         };
 
         const response = await fetch("/api/completion", {
@@ -129,45 +164,30 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
           },
           body: JSON.stringify(requestBody),
         });
-        
-        const { body, ok } = response;
-        if (!body) return;
 
-        const reader = body.getReader();
-
-        if (!ok) {
-          // Get the error message from the response body
-          const { value } = await reader.read();
-          const chunkValue = decoder.decode(value);
-          const { error } = JSON.parse(chunkValue);
-
-          throw new Error(
-            error?.message || "Failed to fetch response, check your API key and try again."
-          );
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error?.message || "Failed to fetch response, check your API key and try again.");
         }
-
-        let done = false;
+  
+        const { reply, tokenUsage } = await response.json(); // Lecture du contenu JSON
+  
+        // Cumuler les tokens dans le localStorage
+        const previousTokenTotal = getStoredTokenCount();
+        const newTokenTotal = previousTokenTotal + tokenUsage;
+        saveTokenCount(newTokenTotal);
+  
+        // Mettre à jour le titre de l'onglet avec le nouveau cumul de tokens
+        updateTabTitleWithTokens(newTokenTotal);  
 
         const message: OpenAIChatMessage = {
           id: messagesToSend.length,
           role: 'assistant',
-          content: '',
+          content: reply,
           model: currentModel, // Ajout du modèle utilisé
         };
 
-        setMessages((prev) => {
-          message.id = prev.length;
-          return [...prev, message];
-        });
-
-        while (!done) {
-          const { value, done: doneReading } = await reader.read();
-          done = doneReading;
-          const chunkValue = decoder.decode(value);
-          message.content += chunkValue;
-
-          updateMessageContent(message.id as number, message.content);
-        }
+        setMessages((prev) => [...prev, message]);
         
       } catch (error: any) {
         setMessages((prev) => [

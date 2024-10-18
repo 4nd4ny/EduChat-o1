@@ -24,19 +24,23 @@ export default async function handler(req: Request) {
         messages,
       };
 
-      const answer = await getOpenAICompletion(payload);
+      // Appel à la fonction qui récupère la réponse et les tokens
+      const { reply, tokenUsage } = await getOpenAICompletion(payload);
 
-      // Retourner directement la réponse sous forme de texte
-      return new Response(answer, {
+      // Retourner la réponse sous forme de JSON
+      const responseBody = JSON.stringify({ reply, tokenUsage });
+
+      // Retourner la réponse structurée
+      return new Response(responseBody, {
         status: 200,
         headers: {
-          "Content-Type": "text/plain",
+          "Content-Type": "application/json", // Indiquer que le contenu est du JSON
         },
       });
 
     } catch (e: any) {
       // Capture l'erreur et renvoie-la sous forme de texte simple
-      return new Response(e.message || "Error fetching response.", {
+      return new Response(await req.text() || "Error fetching response.", {
         status: 500,
         headers: {
           "Content-Type": "text/plain",
