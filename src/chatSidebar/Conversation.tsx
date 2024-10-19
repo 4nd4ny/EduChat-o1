@@ -48,33 +48,32 @@ export default function Conversation({ id, conversation, active }: Props) {
     deleteConversation(id);
   };
 
+  const sanitizeFilename = (input: string): string => {
+    let sanitized = input.replace(/\s+/g, "-");
+    sanitized = sanitized.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    sanitized = sanitized.replace(/[^a-zA-Z0-9-_]/g, "");
+    return sanitized.toLowerCase();
+  };
+
   const handleDownload = () => {
-    
-    function sanitizeFilename(input: string): string {
-      // Remplacer les espaces par des tirets
-      let sanitized = input.replace(/\s+/g, "-");
-    
-      // Remplacer les lettres accentuées et les cédilles par leur équivalent non accentué
-      sanitized = sanitized.normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // Supprime les diacritiques
-    
-      // Supprimer tous les caractères non valides pour un nom de fichier
-      sanitized = sanitized.replace(/[^a-zA-Z0-9-_]/g, "");
-    
-      // Convertir tout en minuscules
-      return sanitized.toLowerCase();
-    }  
-  
+    // Export en format texte (markdown)
     const conversationText = conversation.messages
       .map((msg: any) => `${msg.role}: ${msg.content}`)
       .join("\n\n");
-  
-    const blob = new Blob([conversationText], { type: "text/plain" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = `${sanitizeFilename(newName)}.txt`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    
+    const textBlob = new Blob([conversationText], { type: "text/plain" });
+    const textLink = document.createElement("a");
+    textLink.href = URL.createObjectURL(textBlob);
+    textLink.download = `${sanitizeFilename(newName)}.md`;
+    textLink.click();
+
+    // Export en format JSON
+    const jsonData = JSON.stringify(conversation, null, 2);
+    const jsonBlob = new Blob([jsonData], { type: "application/json" });
+    const jsonLink = document.createElement("a");
+    jsonLink.href = URL.createObjectURL(jsonBlob);
+    jsonLink.download = `${sanitizeFilename(newName)}.json`;
+    jsonLink.click();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
