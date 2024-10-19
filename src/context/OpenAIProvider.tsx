@@ -102,6 +102,25 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
     const totalTokens = previousTokenTotal + tokenUsage;
     updateTotalTokens(totalTokens);
   }
+  function estimateFrenchTokens(text: string) {
+    // 1 token = 3,5 caractères (à la louche pour le français...) mais c'est plus compliqué que ça 
+    const wordCount = text.split(/\s+/).length;  // Nombre de mots (séparés par espace)
+    const charCount = text.length;  // Nombre total de caractères, y compris non-lettres
+    const estimatedTokens = (0.75 * wordCount) + (charCount / 4);  // Formule approximative
+    return Math.ceil(estimatedTokens);
+  }
+  function updateInputTokens(text: string) {
+    /*
+      // Use tiktoken to better count tokens
+      const { encoding_for_model } = require("tiktoken");
+      async function countTokens(text, model = "gpt-3.5-turbo") {
+        const encoder = await encoding_for_model(model); // Chargement de l'encodeur basé sur le modèle
+        const tokens = encoder.encode(text); // Tokenisation du texte
+        return tokens.length;
+      }
+    */
+    updateTokenCount(estimateFrenchTokens(text)); 
+  }
   
   const submit = useCallback(
     async (messages_: OpenAIChatMessage[] = [], modelIndex: number = 0) => {
@@ -123,6 +142,7 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
           model: currentModel,
           messages: messagesToSend.map(({ role, content }) => ({ role, content })),
         };
+        updateInputTokens(JSON.stringify(requestBody.messages));
 
         const response = await fetch("/api/completion", {
           method: "POST",
@@ -297,6 +317,7 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
       messages: [{ role: "user", content: titlePrompt, model: "gpt-4-mini" }],
       model: "gpt-4o-mini" , max_completion_tokens: 100,
     };
+    updateInputTokens(titlePrompt);
     try {
       const response = await fetch('/api/completion', {
         method: 'POST',
@@ -330,9 +351,7 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
 
   const loadConversation = (id: string, conversation: Conversation) => {
     setConversationId(id);
-
     const { messages, name } = conversation;
-
     setMessages(messages);
     setConversationName(name);
   };
@@ -380,7 +399,6 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
   };
 
 
-
   // Conversations
   const [conversations, setConversations] = React.useState<History>({} as History);
 
@@ -388,7 +406,6 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     setConversations(getHistory());
   }, []);
-
 
   const clearConversations = useCallback(() => {
     clearHistory();
@@ -399,7 +416,6 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
 
     router.push("/");
   }, []);
-
 
   const [error] = React.useState("");
 
