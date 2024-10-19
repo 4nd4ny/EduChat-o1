@@ -27,7 +27,7 @@ export default async function handler(req: Request) {
       // Appel à la fonction qui récupère la réponse et les tokens
       const { reply, tokenUsage } = await getOpenAICompletion(payload);
 
-      // Retourner la réponse sous forme de JSON
+      // Retourner la réponse structurée avec la réponse et le nombre de tokens utilisés
       const responseBody = JSON.stringify({ reply, tokenUsage });
 
       // Retourner la réponse structurée

@@ -179,15 +179,15 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
         }
   
         const { reply, tokenUsage } = await response.json(); // Lecture du contenu JSON
-  
+
         const newTokenTotal = updateTokenCount(tokenUsage);
         updateTabTitleWithTokens(newTokenTotal);  
 
         const message: OpenAIChatMessage = {
           id: messagesToSend.length,
           role: 'assistant',
-          content: reply,
-          model: currentModel, // Ajout du modèle utilisé
+          content: reply, // Utilisez 'reply' au lieu de 'answer.reply'
+          model: currentModel,
         };
 
         setMessages((prev) => [...prev, message]);
@@ -268,9 +268,7 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
   
   };
 
-
   // Roles
-
   const toggleMessageRole = (id: number) => {
     setMessages((prev) => {
       const index = prev.findIndex((message) => message.id === id);
@@ -286,8 +284,6 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
       ];
     });
   };
-
-
 
   // Conversation 
   const [conversationId, setConversationId] = React.useState<string>("");
@@ -329,9 +325,12 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
   }, [messages]);
 
   const generateTitle = useCallback(async () => {
-    
+    if (messages.length === 0) return;
     setConversationName("...");
     let name = messages[0].content;
+    if (typeof name !== 'string') {
+      name = name.reply;
+    }
     const titlePrompt = `Summarize the following text in exactly three words, maintaining the language of the statement (usually french):
       <TEXT>
       ${name}
@@ -354,16 +353,16 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const { name, tokenUsage } = await response.json(); // Lecture du contenu JSON  
-      setConversationName(name);
+      const { reply, tokenUsage } = await response.json(); // Lecture du contenu JSON  
+      setConversationName(reply);
+      updateConversationName(conversationId, reply);
       saveTokenCount(tokenUsage);
 
     } catch (error) {
       console.error("Error generating title:", error);
-      name = "New Conversation"; // Fallback title in case of error
     }
   
-  }, [conversationId, messages]);
+  }, [conversationId, messages, setConversationName, updateConversationName]);
 
   useEffect(() => {
     if (messages.length === 1 && messages[0].role === 'user') {

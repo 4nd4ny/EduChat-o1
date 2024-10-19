@@ -22,20 +22,21 @@ export default function Conversation({ id, conversation, active }: Props) {
 
   const [editing, setEditing] = React.useState(false);
   const [name, setName] = React.useState(
-    conversation.name || (conversation.messages[0]?.content || "New conversation")
-);
-
+        conversation.name || (conversation.messages[0]?.content || "...")
+  );
+  const newName: string = typeof name === 'string' ? name : name.reply;
+  
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);
   };
 
   const handleNameSubmit = () => {
-    updateConversationName(id, name);
+    updateConversationName(id, newName);
     setEditing(false);
   };
 
   const handleNameCancel = () => {
-    setName(conversation.name || conversation.messages[0].content);
+    setName(newName);
     setEditing(false);
   };
 
@@ -70,7 +71,7 @@ export default function Conversation({ id, conversation, active }: Props) {
     const blob = new Blob([conversationText], { type: "text/plain" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = `${sanitizeFilename(name)}.txt`;
+    link.download = `${sanitizeFilename(newName)}.txt`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -98,13 +99,13 @@ export default function Conversation({ id, conversation, active }: Props) {
             type="text"
             className="z-50 w-full rounded bg-transparent p-[1px] text-primary outline-primary"
             onChange={handleNameChange}
-            value={name}
+            value={newName}
           />
         ) : (
-          conversation.name || (conversation.messages[0]?.content || "...")
+          newName
         )}
         <div
-          className={`absolute bottom-0  right-0 z-10 h-full w-24 bg-gradient-to-r from-transparent ${
+          className={`absolute bottom-0 right-0 z-10 h-full w-24 bg-gradient-to-r from-transparent ${
             active
               ? "to-[rgb(var(--bg-secondary))]"
               : "to-[rgb(var(--bg-primary))] group-hover:to-[rgb(var(--bg-secondary))]"

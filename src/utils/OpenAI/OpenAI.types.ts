@@ -3,7 +3,7 @@ import { OpenAIChatModels } from "./OpenAI.constants";
 export interface OpenAIChatMessage {
   id?: number;
   role: "assistant" | "user";
-  content: string;
+  content: string | { reply: string; tokenUsage: number };
   model?: keyof typeof OpenAIChatModels;
 }
 

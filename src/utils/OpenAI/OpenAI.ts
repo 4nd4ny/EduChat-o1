@@ -58,7 +58,7 @@ export const getOpenAICompletion = async (
   } catch (error: any) {
     console.error("Error fetching response:", error);
     reply = error.message || "An unexpected error occurred.";
-  }
+    }
   // Retourner la réponse et le nombre de tokens utilisés
   return { reply, tokenUsage: currentTokenUsage };
 };

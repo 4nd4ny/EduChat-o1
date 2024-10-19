@@ -31,7 +31,11 @@ export default function ChatMessage({ message: { role, content, model }, isIniti
 
   // Fonction pour copier le contenu dans le presse-papiers
   const handleCopy = () => {
-    navigator.clipboard.writeText(content);
+    if (typeof content === 'string') {
+      navigator.clipboard.writeText(content);
+    } else {
+      navigator.clipboard.writeText(content.reply);
+    }
     setShowCopiedMessage(true); // Afficher le message temporaire
 
     // Masquer le message après 2 secondes
@@ -75,9 +79,9 @@ export default function ChatMessage({ message: { role, content, model }, isIniti
           )}
           <div className="text-md prose w-full max-w-6xl rounded p-4 text-primary dark:prose-invert prose-code:text-primary prose-pre:bg-transparent prose-pre:p-0">
             {role === "user" ? (
-              <UserMessageContent content={content} />
+              <UserMessageContent content={typeof content === 'string' ? content : content.reply} />
             ) : (
-              <AssistantMessageContent content={content} />
+              <AssistantMessageContent content={typeof content === 'string' ? content : content.reply} />
             )}
           </div>
           {/* Icône pour copier le contenu avec message temporaire */}
