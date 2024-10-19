@@ -48,7 +48,6 @@ export const getOpenAICompletion = async (
         if (data.usage) {
           const { total_tokens } = data.usage;
           currentTokenUsage = total_tokens;  // Nombre total de tokens utilisés pour cette requête
-          console.log(`Tokens utilisés dans cet appel : ${currentTokenUsage}`);
         }
       } else {
         reply = "Invalid response structure from OpenAI API.";

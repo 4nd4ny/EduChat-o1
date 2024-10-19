@@ -1,24 +1,20 @@
 // Fonction pour formater les tokens en kt, mt, gt, etc.
 export const formatTokens = (totalTokens: number): string => {
-    // Définition des seuils pour les valeurs des unités
-    const kilo = 1_000;          // 10^3
-    const mega = 1_000_000;      // 10^6
-    const giga = 1_000_000_000;  // 10^9
-    const tera = 1_000_000_000_000;  // 10^12
-    const peta = 1_000_000_000_000_000;  // 10^15
-    let formattedValue: string;
-    if (totalTokens >= peta) {
-        formattedValue = `${(totalTokens / peta).toFixed(2)} TkP`; // Petatokens
-    } else if (totalTokens >= tera) {
-        formattedValue = `${(totalTokens / tera).toFixed(2)} TkT`; // Teratokens
-    } else if (totalTokens >= giga) {
-        formattedValue = `${(totalTokens / giga).toFixed(2)} TkG`; // Gigatokens
-    } else if (totalTokens >= mega) {
-        formattedValue = `${(totalTokens / mega).toFixed(2)} TkM`; // Megatokens
-    } else if (totalTokens >= kilo) {
-        formattedValue = `${(totalTokens / kilo).toFixed(2)} TkK`; // Kilotokens
-    } else {
-        formattedValue = `${totalTokens} tokens`; // Tokens (pour les petites valeurs)
+    let num = totalTokens;
+    // Définition des seuils et unités
+    // K: Mille, M: Million, B: Milliard, T: Billion (trillion), P: Billiard, E: Trillion, Z: Quadrillion, Y: Quintillion
+    const units = ["", "K", "M", "G", "T", "P", "E", "Z", "Y"]; 
+    let unitIndex = 0;
+
+    // Boucle tant que le nombre est supérieur ou égal à 1000 et qu'on a des unités disponibles
+    while (num >= 1000 && unitIndex < units.length - 1) {
+        num /= 1000;
+        unitIndex++;
     }
-    return formattedValue;
-};
+
+    // Limite le nombre à 3 chiffres significatifs
+    const formattedNumber = num < 10 ? num.toFixed(2) : (num < 100 ? num.toFixed(1) : num.toFixed(0));
+
+    // Retourne le nombre formaté avec son unité
+    return `${formattedNumber} ${units[unitIndex]}Tok.`;
+}
