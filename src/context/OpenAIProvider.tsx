@@ -88,58 +88,20 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
 
   // Messages
   const [messages, setMessages] = React.useState<OpenAIChatMessage[]>([]);
-
-  // Fonction getStoredTokenCount pour récupérer le total de tokens :
-  function getStoredTokenCount(): number {
-    const storedTokens = localStorage.getItem('totalTokens');
-    return storedTokens ? parseInt(storedTokens, 10) : 0; // Retourne 0 si aucun token n'est stocké
-  }
   
-  // Fonction saveTokenCount pour sauvegarder le nouveau total de tokens :
-  function saveTokenCount(totalTokens: number) {
-    localStorage.setItem('totalTokens', totalTokens.toString());
-  }
-
   // Fonction updateTokenCount pour mettre à jour le total de tokens :
+  const updateTotalTokens = (newTotal: number) => {
+    localStorage.setItem('totalTokens', newTotal.toString());
+    // Créez un événement personnalisé
+    const event = new Event('totalTokensUpdated');
+    window.dispatchEvent(event);
+  };
   function updateTokenCount(tokenUsage: number) {
-    const previousTokenTotal = getStoredTokenCount();
-    const newTokenTotal = previousTokenTotal + tokenUsage;
-    saveTokenCount(newTokenTotal);
-    return newTokenTotal;
+    const storedTokens = localStorage.getItem('totalTokens');
+    const previousTokenTotal = storedTokens ? parseInt(storedTokens, 10) : 0;
+    const totalTokens = previousTokenTotal + tokenUsage;
+    updateTotalTokens(totalTokens);
   }
-
-  // Fonction pour formater les tokens en kt, mt, gt, etc.
-  const formatTokens = (totalTokens: number): string => {
-    // Définition des seuils pour les valeurs des unités
-    const kilo = 1_000;          // 10^3
-    const mega = 1_000_000;      // 10^6
-    const giga = 1_000_000_000;  // 10^9
-    const tera = 1_000_000_000_000;  // 10^12
-    const peta = 1_000_000_000_000_000;  // 10^15
-    let formattedValue: string;
-    
-    if (totalTokens >= peta) {
-      formattedValue = `${(totalTokens / peta).toFixed(2)} Pt`; // Petatokens
-    } else if (totalTokens >= tera) {
-      formattedValue = `${(totalTokens / tera).toFixed(2)} Tt`; // Teratokens
-    } else if (totalTokens >= giga) {
-      formattedValue = `${(totalTokens / giga).toFixed(2)} Gt`; // Gigatokens
-    } else if (totalTokens >= mega) {
-      formattedValue = `${(totalTokens / mega).toFixed(2)} Mt`; // Megatokens
-    } else if (totalTokens >= kilo) {
-      formattedValue = `${(totalTokens / kilo).toFixed(2)} Kt`; // Kilotokens
-    } else {
-      formattedValue = `${totalTokens} tokens`; // Tokens (pour les petites valeurs)
-    }
-
-    return formattedValue;
-  };
-
-  // Fonction pour mettre à jour le titre de l'onglet avec les unités appropriées
-  const updateTabTitleWithTokens = (totalTokens: number) => {
-    const formattedTokens = formatTokens(totalTokens);  // Convertir en kt, mt, etc.
-    document.title = `EduChat: ${formattedTokens}`;
-  };
   
   const submit = useCallback(
     async (messages_: OpenAIChatMessage[] = [], modelIndex: number = 0) => {
@@ -153,8 +115,6 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
       const currentModel = modelList[modelIndex+1];
         
       try {
-        const decoder = new TextDecoder();
-
         // Sélection du modèle actuel en fonction de l'index
         const maximum = OpenAIChatModels[currentModel].maxLimit;
         
@@ -179,9 +139,7 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
         }
   
         const { reply, tokenUsage } = await response.json(); // Lecture du contenu JSON
-
-        const newTokenTotal = updateTokenCount(tokenUsage);
-        updateTabTitleWithTokens(newTokenTotal);  
+        updateTokenCount(tokenUsage);
 
         const message: OpenAIChatMessage = {
           id: messagesToSend.length,
@@ -356,7 +314,7 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
       const { reply, tokenUsage } = await response.json(); // Lecture du contenu JSON  
       setConversationName(reply);
       updateConversationName(conversationId, reply);
-      saveTokenCount(tokenUsage);
+      updateTokenCount(tokenUsage);
 
     } catch (error) {
       console.error("Error generating title:", error);
