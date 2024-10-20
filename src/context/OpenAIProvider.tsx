@@ -363,51 +363,88 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
 
   const importConversation = useCallback((jsonData: any) => {
     try {
-      // Vérifier si les données importées ont la structure attendue
-      if (!jsonData.name || !jsonData.messages || !Array.isArray(jsonData.messages)) {
-        throw new Error("Invalid conversation format");
+      // 1. Validation stricte de la structure
+      if (!isValidConversationStructure(jsonData)) {
+        throw new Error("Invalid conversation structure");
       }
-  
-      // Créer un nouvel ID pour la conversation importée
-      const newId = uuidv4();
-  
-      // Créer une nouvelle conversation à partir des données importées
-      const newConversation: Conversation = {
-        name: jsonData.name,
-        createdAt: jsonData.createdAt || Date.now(),
-        lastMessage: jsonData.lastMessage || Date.now(),
-        messages: jsonData.messages.map((msg: any, index: number) => {
-          const message: OpenAIChatMessage = {
-            id: index,
-            role: msg.role as "assistant" | "user",
-            content: typeof msg.content === 'string' ? msg.content : msg.content.reply,
-            model: msg.model as keyof typeof OpenAIChatModels | undefined
-          };
-          return message;
-        })
+
+      // 2. Limiter la taille du JSON
+      const jsonString = JSON.stringify(jsonData);
+      if (jsonString.length > 1000000) { // Par exemple, limite à 1 Mo
+        throw new Error("Imported conversation is too large");
+      }
+
+      // 3. Sanitisation des données
+      const sanitizedConversation: Conversation = {
+        name: sanitizeString(jsonData.name, 100), // Limiter à 100 caractères
+        createdAt: Number(jsonData.createdAt) || Date.now(),
+        lastMessage: Number(jsonData.lastMessage) || Date.now(),
+        messages: jsonData.messages.map((msg: any, index: number) => ({
+          id: index,
+          role: msg.role === "assistant" || msg.role === "user" ? msg.role : "user",
+          content: sanitizeString(typeof msg.content === 'string' ? msg.content : msg.content.reply, 10000), // Limiter à 10000 caractères
+          model: isValidModel(msg.model) ? msg.model : undefined
+        }))
       };
-  
+
+      const newId = uuidv4();
+
       // Mettre à jour l'état local
       setConversations((prev: History) => ({
         ...prev,
-        [newId]: newConversation
+        [newId]: sanitizedConversation
       }));
-  
+
       // Stocker la nouvelle conversation
-      storeConversation(newId, newConversation);
-  
+      storeConversation(newId, sanitizedConversation);
+
       // Charger la conversation importée
-      loadConversation(newId, newConversation);
-  
+      loadConversation(newId, sanitizedConversation);
+
       // Rediriger vers la nouvelle conversation
       router.push(`/chat/${newId}`);
-  
+
       console.log("Conversation imported successfully");
     } catch (error) {
       console.error("Error importing conversation:", error);
-      // Vous pourriez ajouter ici une notification pour l'utilisateur
+      // Notification à l'utilisateur
     }
   }, [router, loadConversation]);
+
+  // Fonctions auxiliaires
+
+  function isValidConversationStructure(data: any): boolean {
+    return (
+      typeof data === 'object' &&
+      typeof data.name === 'string' &&
+      Array.isArray(data.messages) &&
+      data.messages.every((msg: any) =>
+        typeof msg === 'object' &&
+        (msg.role === 'assistant' || msg.role === 'user') &&
+        (typeof msg.content === 'string' || (typeof msg.content === 'object' && typeof msg.content.reply === 'string'))
+      )
+    );
+  }
+
+  function sanitizeString(str: string, maxLength: number): string {
+    // Échapper les caractères HTML et limiter la longueur
+    return str
+      .replace(/[&<>"']/g, (char) => {
+        const entities: { [key: string]: string } = {
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          '"': '&quot;',
+          "'": '&#39;'
+        };
+        return entities[char];
+      })
+      .slice(0, maxLength);
+  }
+
+  function isValidModel(model: any): model is keyof typeof OpenAIChatModels {
+    return typeof model === 'string' && model in OpenAIChatModels;
+  }
       
   const resetConversation = useCallback(() => {
     const newId = Date.now().toString();
