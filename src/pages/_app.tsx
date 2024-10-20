@@ -1,6 +1,6 @@
-import OpenAIProvider from "../context/OpenAIProvider";
+import OpenAIProvider from "@/context/OpenAIProvider";
 import type { AppProps } from "next/app";
-import Layout from '../context/Layout'; 
+import Layout from "@/context/Layout"; 
 
 import "@/utils/globals.css";
 

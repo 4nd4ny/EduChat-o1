@@ -8,8 +8,8 @@ import {
   MdDownload, 
   MdDriveFileRenameOutline,
 } from "react-icons/md";
-import { Conversation as ConversationI } from "../context/History";
-import { useOpenAI } from "../context/OpenAIProvider";
+import { Conversation as ConversationI } from "@/context/History";
+import { useOpenAI } from "@/context/OpenAIProvider";
 
 type Props = {
   id: string;

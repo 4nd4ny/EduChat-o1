@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import { MdPerson, MdSmartToy, MdContentCopy, MdAutorenew } from "react-icons/md";
 import AssistantMessageContent from "./AssistantMessageContent";
 import UserMessageContent from "./UserMessageContent";
-import { useOpenAI } from "../context/OpenAIProvider";
+import { useOpenAI } from "@/context/OpenAIProvider";
 
 type Props = {
   message: OpenAIChatMessage;

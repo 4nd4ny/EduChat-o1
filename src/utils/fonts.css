@@ -1,4 +1,4 @@
-// Serif Day
+/* Serif Day */
 
 @font-face {
   font-family: "iASerifDaySC";
@@ -77,7 +77,7 @@
   src: url("/iA_Serif/iASerifItalic-BoldSa.woff2") format("woff2");
 }
 
-// Serif Night
+/* Serif Night */
 
 @font-face {
   font-family: "iASerifNightSC";
@@ -156,7 +156,7 @@
   src: url("/iA_Serif/iASerifItalic-BoldSa.woff2") format("woff2");
 }
 
-// ICONIC IS BACK!
+/* ICONIC IS BACK! */
 
 @font-face {
   font-family: "iAIconic";
@@ -165,7 +165,7 @@
   src: url("/Iconic/Iconic-Regular.woff2") format("woff2");
 }
 
-// Typography only for iA Window
+/* Typography only for iA Window */
 
 @font-face {
   font-family: "iAWriter";

@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback  } from 'react';
-import ProtectedPage from "./ProtectedPage";
-import ChatSidebar from "../chatSidebar/ChatSidebar";
+import ProtectedPage from "@/context/ProtectedPage";
+import ChatSidebar from "@/chatSidebar/ChatSidebar";
 import Head from "next/head";
 import { useRouter } from 'next/router';
-import styles from '../utils/sidebar.module.css';
-import { formatTokens } from '../utils/formatTokens'; // Assurez-vous de créer ce fichier
+import styles from '@/utils/sidebar.module.css';
+import { formatTokens } from '@/utils/formatTokens'; // Assurez-vous de créer ce fichier
 
 interface LayoutProps {
   children: React.ReactNode;

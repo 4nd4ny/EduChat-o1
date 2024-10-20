@@ -1,4 +1,4 @@
-import { useOpenAI } from "../context/OpenAIProvider";
+import { useOpenAI } from "@/context/OpenAIProvider";
 import React, { useState, useEffect, useRef } from "react";
 import ChatInput from "./ChatInput";
 import ChatMessage from "./ChatMessage";

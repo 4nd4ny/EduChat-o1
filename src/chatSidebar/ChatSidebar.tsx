@@ -1,7 +1,7 @@
 import Link from "next/link";
 import React, { useCallback }  from "react";
 import { MdAdd, MdDeleteOutline, MdUploadFile } from "react-icons/md";
-import { useOpenAI } from "../context/OpenAIProvider";
+import { useOpenAI } from "@/context/OpenAIProvider";
 import Conversations from "./Conversations";
 import ButtonContainer from "./ButtonContainer";
 import { useDropzone } from 'react-dropzone';

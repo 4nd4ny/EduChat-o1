@@ -1,4 +1,4 @@
-import { useOpenAI } from "../context/OpenAIProvider";
+import { useOpenAI } from "@/context/OpenAIProvider";
 import Conversation from "./Conversation";
 
 type Props = {};

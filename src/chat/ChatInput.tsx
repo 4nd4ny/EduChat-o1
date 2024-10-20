@@ -1,5 +1,5 @@
 import React from "react";
-import { useOpenAI } from "../context/OpenAIProvider";
+import { useOpenAI } from "@/context/OpenAIProvider";
 import { MdSend } from "react-icons/md";
 
 type Props = {};

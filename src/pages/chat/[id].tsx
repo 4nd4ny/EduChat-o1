@@ -1,9 +1,9 @@
-import ChatMessages from "../../chat/ChatMessages";
-import ChatSidebar from "../../chatSidebar/ChatSidebar";
+import ChatMessages from "@/chat/ChatMessages";
+import ChatSidebar from "@/chatSidebar/ChatSidebar";
 import { useRouter } from "next/router";
 import React from "react";
-import { getConversation } from "../../context/History";
-import { useOpenAI } from "../../context/OpenAIProvider";
+import { getConversation } from "@/context/History";
+import { useOpenAI } from "@/context/OpenAIProvider";
 
 export default function Chat() {
   const { loadConversation, conversationId } = useOpenAI();
