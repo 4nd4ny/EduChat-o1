@@ -6,6 +6,7 @@ const HISTORY_KEY = "pg-history";
 // Types
 export type Conversation = {
   name: string;
+  createdAt: number; // Unix timestamp
   lastMessage: number; // Unix timestamp
   messages: OpenAIChatMessage[];
 };

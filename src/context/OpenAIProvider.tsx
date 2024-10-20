@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from "uuid";
 import {
   Conversation,
   getHistory,
@@ -38,6 +39,7 @@ const defaultContext = {
   updateConversationName: () => {},
   generateTitle: () => {},
   loadConversation: (id: string, conversation: Conversation) => {},
+  importConversation: (jsonData: any) => {},
   resetConversation: () => {}, 
   deleteConversation: () => {},  
   clearConversation: () => {},
@@ -67,7 +69,9 @@ const OpenAIContext = React.createContext<{
   conversationName: string;
   updateConversationName: (id: string, name: string) => void;
   generateTitle: () => void;
+
   loadConversation: (id: string, conversation: Conversation) => void;
+  importConversation: (jsonData: any) => void;
   resetConversation: () => void; 
   deleteConversation: (id: string) => void;
   clearConversation: () => void;
@@ -287,8 +291,9 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
 
     const conversation = {
       name: conversationName,
-      messages,
+      createdAt: Date.now(),
       lastMessage: Date.now(),
+      messages,
     } as Conversation;
 
     let id = storeConversation(conversationId, conversation);
@@ -356,6 +361,54 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
     setConversationName(name);
   };
 
+  const importConversation = useCallback((jsonData: any) => {
+    try {
+      // Vérifier si les données importées ont la structure attendue
+      if (!jsonData.name || !jsonData.messages || !Array.isArray(jsonData.messages)) {
+        throw new Error("Invalid conversation format");
+      }
+  
+      // Créer un nouvel ID pour la conversation importée
+      const newId = uuidv4();
+  
+      // Créer une nouvelle conversation à partir des données importées
+      const newConversation: Conversation = {
+        name: jsonData.name,
+        createdAt: jsonData.createdAt || Date.now(),
+        lastMessage: jsonData.lastMessage || Date.now(),
+        messages: jsonData.messages.map((msg: any, index: number) => {
+          const message: OpenAIChatMessage = {
+            id: index,
+            role: msg.role as "assistant" | "user",
+            content: typeof msg.content === 'string' ? msg.content : msg.content.reply,
+            model: msg.model as keyof typeof OpenAIChatModels | undefined
+          };
+          return message;
+        })
+      };
+  
+      // Mettre à jour l'état local
+      setConversations((prev: History) => ({
+        ...prev,
+        [newId]: newConversation
+      }));
+  
+      // Stocker la nouvelle conversation
+      storeConversation(newId, newConversation);
+  
+      // Charger la conversation importée
+      loadConversation(newId, newConversation);
+  
+      // Rediriger vers la nouvelle conversation
+      router.push(`/chat/${newId}`);
+  
+      console.log("Conversation imported successfully");
+    } catch (error) {
+      console.error("Error importing conversation:", error);
+      // Vous pourriez ajouter ici une notification pour l'utilisateur
+    }
+  }, [router, loadConversation]);
+      
   const resetConversation = useCallback(() => {
     const newId = Date.now().toString();
 
@@ -366,8 +419,9 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
     // Créer une nouvelle conversation
     const newConversation: Conversation = {
       name: "...",
-      messages: [],
+      createdAt: Date.now(),
       lastMessage: Date.now(),
+      messages: [],
     };
 
     // Mettre à jour l'historique des conversations
@@ -437,6 +491,7 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
       updateConversationName,
       generateTitle,
       loadConversation,
+      importConversation,
       deleteConversation,
       resetConversation,
       clearConversation,
@@ -453,6 +508,7 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
       addMessage,
 
       conversationId,
+      importConversation,
       resetConversation,
       clearConversations,
       conversations,
