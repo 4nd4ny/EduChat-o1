@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { SecretPassword, AllowedHours,AllowedIps } from '@/utils/OpenAI/OpenAI.constants';
+import { SecretPassword, AllowedHours, AllowedIps } from '@/utils/OpenAI/OpenAI.constants';
 import fs from 'fs/promises';
 import path from 'path';
 import bcrypt from 'bcrypt';
@@ -225,15 +225,13 @@ function isAccessAllowed() {
   // Obtenir l'heure et les minutes actuelles
   const currentHour = localTime.hour;
   const currentMinute = localTime.minute;
-
   // Récupérer les plages horaires définies dans l'environnement
-  const accessHours = JSON.parse(process.env.AllowedHours || '[]');
+  const accessHours = JSON.parse(AllowedHours || '[]');
 
   // Vérifier si l'heure actuelle correspond à une des plages autorisées
   for (let entry of accessHours) {
     const [startHour, startMinute] = entry.start.split(':').map(Number);
     const [endHour, endMinute] = entry.end.split(':').map(Number);
-
     // Si le jour correspond et que l'heure est dans la plage, on autorise l'accès
     if (entry.day === currentDay && isInTimeRange(startHour, startMinute, endHour, endMinute, currentHour, currentMinute)) {
       return true;
@@ -257,6 +255,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     res.status(200).json({ success: true, message: "Autologin activé via verrou" });
     return;
   } 
+
+  console.log("is allowed ?", AllowedIps.includes(clientIp), isAccessAllowed( ));
 
   // Vérifier si l'IP est dans la liste des IP autorisées et dans la plage horaire autorisée, sans qu'il soit nécessaire de déverrouiller le site
   if (AllowedIps.includes(clientIp) && isAccessAllowed()) {
