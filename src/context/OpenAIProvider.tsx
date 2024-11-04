@@ -308,12 +308,15 @@ export default function OpenAIProvider({ children }: PropsWithChildren) {
   }, [messages]);
 
   const generateTitle = useCallback(async () => {
-    if (messages.length === 0) return;
-    setConversationName("...");
+    if (messages.length === 0) {
+      setConversationName("...");
+      return;
+    }
     let name = messages[0].content;
     if (typeof name !== 'string') {
       name = name.reply;
     }
+
     const titlePrompt = `Summarize the following text in exactly three words, maintaining the language of the statement (usually french):
       <TEXT>
       ${name}

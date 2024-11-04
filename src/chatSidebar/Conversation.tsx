@@ -1,5 +1,5 @@
 import Link from "next/link";
-import React from "react";
+import React, { useEffect } from "react";
 import {
   MdChatBubbleOutline,
   MdCheck,
@@ -17,26 +17,47 @@ type Props = {
   active: boolean;
 };
 
+// Fonction utilitaire pour extraire le contenu textuel d'un message
+const getMessageContent = (content: string | { reply: string; tokenUsage: number }): string => {
+  if (typeof content === 'string') {
+    return content;
+  }
+  return content.reply;
+};
+
 export default function Conversation({ id, conversation, active }: Props) {
   const { updateConversationName, deleteConversation } = useOpenAI();
-
   const [editing, setEditing] = React.useState(false);
-  const [name, setName] = React.useState(
-        conversation.name || (conversation.messages[0]?.content || "...")
-  );
-  const newName: string = typeof name === 'string' ? name : name.reply;
-  
+
+  // Fonction pour obtenir le nom initial
+  const getInitialName = (): string => {
+    if (conversation.name) {
+      return conversation.name;
+    }
+    if (conversation.messages[0]?.content) {
+      return getMessageContent(conversation.messages[0].content);
+    }
+    return "...";
+  };
+
+  const [name, setName] = React.useState<string>(getInitialName());
+
+  // Synchroniser l'état local du nom avec les changements de la conversation
+  useEffect(() => {
+    setName(getInitialName());
+  }, [conversation.name, conversation.messages]);
+
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setName(e.target.value);
   };
 
   const handleNameSubmit = () => {
-    updateConversationName(id, newName);
+    updateConversationName(id, name);
     setEditing(false);
   };
 
   const handleNameCancel = () => {
-    setName(newName);
+    setName(conversation.name);
     setEditing(false);
   };
 
@@ -48,23 +69,24 @@ export default function Conversation({ id, conversation, active }: Props) {
     deleteConversation(id);
   };
 
-  const sanitizeFilename = (input: string): string => {
-    let sanitized = input.replace(/\s+/g, "-");
-    sanitized = sanitized.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    sanitized = sanitized.replace(/[^a-zA-Z0-9-_]/g, "");
-    return sanitized.toLowerCase();
-  };
-
   const handleDownload = () => {
+    
+    function sanitizeFilename(input: string): string {
+      let sanitized = input.replace(/\s+/g, "-");
+      sanitized = sanitized.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      sanitized = sanitized.replace(/[^a-zA-Z0-9-_]/g, "");
+      return sanitized.toLowerCase();
+    };
+
     // Export en format texte (markdown)
     const conversationText = conversation.messages
-      .map((msg: any) => `${msg.role}: ${msg.content}`)
+      .map((msg: any) => `${msg.role}: ${getMessageContent(msg.content)}`)
       .join("\n\n");
     
     const textBlob = new Blob([conversationText], { type: "text/plain" });
     const textLink = document.createElement("a");
     textLink.href = URL.createObjectURL(textBlob);
-    textLink.download = `${sanitizeFilename(newName)}.md`;
+    textLink.download = `${sanitizeFilename(conversation.name)}.md`;
     textLink.click();
 
     // Export en format JSON
@@ -72,7 +94,7 @@ export default function Conversation({ id, conversation, active }: Props) {
     const jsonBlob = new Blob([jsonData], { type: "application/json" });
     const jsonLink = document.createElement("a");
     jsonLink.href = URL.createObjectURL(jsonBlob);
-    jsonLink.download = `${sanitizeFilename(newName)}.json`;
+    jsonLink.download = `${sanitizeFilename(conversation.name)}.json`;
     jsonLink.click();
   };
 
@@ -98,10 +120,10 @@ export default function Conversation({ id, conversation, active }: Props) {
             type="text"
             className="z-50 w-full rounded bg-transparent p-[1px] text-primary outline-primary"
             onChange={handleNameChange}
-            value={newName}
+            value={name}
           />
         ) : (
-          newName
+          name
         )}
         <div
           className={`absolute bottom-0 right-0 z-10 h-full w-24 bg-gradient-to-r from-transparent ${

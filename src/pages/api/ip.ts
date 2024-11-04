@@ -9,7 +9,6 @@ const allowedIps = [
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   const ip = requestIp.getClientIp(req) || 'unknown';
-  console.log(ip);
   // Function to check if the client's IP is allowed
   const isIpAllowed = (ip: string) => { return allowedIps.includes(ip); };
   res.status(200).json({ip: ip, isIpAllowed: isIpAllowed(ip)});

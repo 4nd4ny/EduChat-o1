@@ -1,4 +1,4 @@
-import { OpenAIChatMessage, OpenAIConfig } from "@/utils/OpenAI";
+import { OpenAIChatMessage } from "@/utils/OpenAI";
 import { v4 as uuidv4 } from "uuid";
 
 const HISTORY_KEY = "pg-history";

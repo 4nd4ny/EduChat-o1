@@ -256,8 +256,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return;
   } 
 
-  console.log("is allowed ?", AllowedIps.includes(clientIp), isAccessAllowed( ));
-
   // Vérifier si l'IP est dans la liste des IP autorisées et dans la plage horaire autorisée, sans qu'il soit nécessaire de déverrouiller le site
   if (AllowedIps.includes(clientIp) && isAccessAllowed()) {
     logAttempt(req, ANONYMOUS, 'IP Check', true, 'ip'); // Ne mémorise pas les IP connues des postes-école utilisés par les élèves
